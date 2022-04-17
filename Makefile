@@ -8,7 +8,7 @@ BIN=$(patsubst %.c,%,$(BIN_SRC))
 TEST_SRC=$(wildcard tests/*_tests.c)
 TESTS=$(patsubst %.c,%,$(TEST_SRC))
 
-LIB_SRC=$(wildcard lib/*.c)
+LIB_SRC=$(wildcard src/*.c)
 LIB=$(patsubst %.c,%.o,$(LIB_SRC))
 
 EXTERNAL_SRC=$(wildcard ../contrib/**/bstring/bstrlib.c ../contrib/**/src/*.c)
