@@ -9,7 +9,7 @@
 #define LOG_DEBUG(M, ...)
 #else
 #define LOG_DEBUG(M, ...)                                               \
-    fprintf(stderr, "[DEBUG] %s:%d in %s: " M "\n", __FILE__, __LINE__, \
+    fprintf(stderr, "[DEBUG] (%s:%d in %s) " M "\n", __FILE__, __LINE__, \
             __func__, ##__VA_ARGS__)
 #endif
 
