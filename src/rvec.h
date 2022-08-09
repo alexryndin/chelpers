@@ -1,7 +1,7 @@
 #ifndef RVEC_H
 #define RVEC_H
 
-#include <dbg.h>
+#include "dbg.h"
 #include <stdlib.h>
 
 typedef enum {
@@ -25,14 +25,14 @@ typedef enum {
 #define rv_max(v) ((v).m)
 
 #define REALLOC_FACTOR 1.5
-#define rv_destroy(v)  \
-  do {                 \
-    if (v.a != NULL) { \
-      free((v).a);     \
-      (v).a = NULL;    \
-      (v).m = 0;       \
-      (v).n = 0;       \
-    }                  \
+#define rv_destroy(v)    \
+  do {                   \
+    if ((v).a != NULL) { \
+      free((v).a);       \
+      (v).a = NULL;      \
+      (v).m = 0;         \
+      (v).n = 0;         \
+    }                    \
   } while (0)
 
 #define rv_resize(v, s, e)                                        \
@@ -44,7 +44,7 @@ typedef enum {
       }                                                           \
       break;                                                      \
     }                                                             \
-    typeof(*v.a) *swap = NULL;                                    \
+    typeof(*(v).a) *swap = NULL;                                  \
     swap = realloc((v).a, sizeof(*(v).a) * s);                    \
     if (swap == NULL) {                                           \
       LOG_ERR("Vector reallocation failed");                      \
@@ -84,24 +84,21 @@ typedef enum {
 #define rv_pop(v, e)                                                         \
   (((v).n <= (v).m) && ((v).n > 0)                                           \
        ? (v).a[--(v).n]                                                      \
-       : (LOG_ERR("Out of bounds."),                                         \
-          e != NULL ? (*(int *)e = R_ERR_OUT_OF_BOUNDS, (typeof(*(v).a)){0}) \
+       : (e != NULL ? (*(int *)e = R_ERR_OUT_OF_BOUNDS, (typeof(*(v).a)){0}) \
                     : (typeof(*(v).a)){0},                                   \
           (typeof(*(v).a)){0}))
 
 #define rv_get(v, i, e)                                                       \
   (((i) < (v).n) && ((i) >= 0)                                                \
        ? &((v).a[i])                                                          \
-       : (LOG_ERR("Out of bounds."),                                          \
-          e != (NULL)                                                       \
+       : (e != (NULL)                                                         \
               ? (*(int *)e = R_ERR_OUT_OF_BOUNDS, ((typeof(*(v).a) *)(NULL))) \
               : ((typeof(*(v).a) *)(NULL))))
 
 #define rv_set(vec, i, value, e)                                               \
   (((i) < (vec).m) && ((i) >= 0)                                               \
        ? ((vec).n = ((vec).n > i ? (vec).n : i + 1), (vec).a[i] = value)       \
-       : (LOG_ERR("Out of bounds."),                                           \
-          e != NULL ? (*(int *)e = R_ERR_OUT_OF_BOUNDS, (typeof(*(vec).a)){0}) \
+       : (e != NULL ? (*(int *)e = R_ERR_OUT_OF_BOUNDS, (typeof(*(vec).a)){0}) \
                     : (typeof(*(vec).a)){0},                                   \
           (typeof(*(vec).a)){0}))
 
