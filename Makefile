@@ -2,33 +2,27 @@ CFLAGS=-g -O2 -Wall -Wextra -Wstrict-prototypes -Wmissing-prototypes -pedantic -
 LDLIBS=-pedantic  $(OPTLIBS)
 PREFIX?=/usr/local
 
-BIN_SRC=$(wildcard *.c)
-BIN=$(patsubst %.c,%,$(BIN_SRC))
-
 TEST_SRC=$(wildcard tests/*_tests.c)
 TESTS=$(patsubst %.c,%,$(TEST_SRC))
 
 LIB_SRC=$(wildcard src/*.c)
 LIB=$(patsubst %.c,%.o,$(LIB_SRC))
+LIB:=$(filter-out src/bbstrlib%, $(LIB))
 
-EXTERNAL_SRC=$(wildcard ../contrib/**/bstring/bstrlib.c ../contrib/**/src/*.c)
-EXTERNAL_SRC_NO_TESTS=$(filter-out %test.c, $(EXTERNAL_SRC))
-EXTERNAL=$(patsubst %.c,%.o,$(EXTERNAL_SRC_NO_TESTS))
-
-all: $(BIN) $(SHARED) tests
+all: $(LIB) tests
 
 dev: CFLAGS := $(filter-out -O2,$(CFLAGS))
 dev: CFLAGS := $(filter-out -DNDEBUG,$(CFLAGS))
 dev: CFLAGS := $(filter-out -pedantic,$(CFLAGS))
 dev: all
 
-$(BIN): $(LIB) $(EXTERNAL)
+$(BIN): $(LIB)
 
-$(TESTS): $(LIB) $(EXTERNAL)
+$(TESTS): $(LIB)
 
 $(TARGET): CFLAGS += -fPIC
-$(TARGET): build $(OBJECTS) $(EXTERNAL)
-	ar rcs $@ $(OBJECTS) $(EXTERNAL)
+$(TARGET): build $(OBJECTS)
+	ar rcs $@ $(OBJECTS)
 	ranlib $@
 
 # The Unit Tests
