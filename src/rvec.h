@@ -73,6 +73,7 @@ typedef enum {
         LOG_ERR("Vector reallocation failed");                      \
         if (err != NULL) {                                          \
           *(int *)err = R_ERR_MEM;                                  \
+          break;                                                    \
         }                                                           \
       }                                                             \
       (vec).a = swap;                                               \
@@ -85,8 +86,7 @@ typedef enum {
   (((v).n <= (v).m) && ((v).n > 0)                                           \
        ? (v).a[--(v).n]                                                      \
        : (e != NULL ? (*(int *)e = R_ERR_OUT_OF_BOUNDS, (typeof(*(v).a)){0}) \
-                    : (typeof(*(v).a)){0},                                   \
-          (typeof(*(v).a)){0}))
+                    : (typeof(*(v).a)){0}))
 
 #define rv_get(v, i, e)                                                       \
   (((i) < (v).n) && ((i) >= 0)                                                \
@@ -99,7 +99,6 @@ typedef enum {
   (((i) < (vec).m) && ((i) >= 0)                                               \
        ? ((vec).n = ((vec).n > i ? (vec).n : i + 1), (vec).a[i] = value)       \
        : (e != NULL ? (*(int *)e = R_ERR_OUT_OF_BOUNDS, (typeof(*(vec).a)){0}) \
-                    : (typeof(*(vec).a)){0},                                   \
-          (typeof(*(vec).a)){0}))
+                    : (typeof(*(vec).a)){0}))
 
 #endif
