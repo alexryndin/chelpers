@@ -3,6 +3,62 @@
 #include <rvec.h>
 #include <stdlib.h>
 
+#define wspace(c) (isspace((unsigned char)c))
+
+/* Just a length safe wrapper for memmove. */
+
+#define bBlockCopy(D, S, L)   \
+  do {                        \
+    if ((L) > 0) {            \
+      memmove((D), (S), (L)); \
+    }                         \
+  } while (0);
+
+int tbdelete(bstring b, int pos, int len) {
+  /* Clamp to left side of bstring */
+  if (pos < 0) {
+    len += pos;
+    pos = 0;
+  }
+  if (len < 0 || b == NULL || b->data == NULL || b->slen < 0) {
+    return BSTR_ERR;
+  }
+  if (len > 0 && pos < b->slen) {
+    if (pos + len >= b->slen) {
+      b->slen = pos;
+    } else {
+      bBlockCopy(
+          (char *)(b->data + pos),
+          (char *)(b->data + pos + len),
+          b->slen - (pos + len));
+      b->slen -= len;
+    }
+    b->data[b->slen] = (unsigned char)'\0';
+  }
+  return BSTR_OK;
+}
+
+int tbtrimws(bstring b) {
+  int i, j;
+  if (b == NULL || b->data == NULL || b->slen < 0) {
+    return BSTR_ERR;
+  }
+  for (i = b->slen - 1; i >= 0; i--) {
+    if (!wspace(b->data[i])) {
+      if (b->mlen > i) {
+        b->data[i + 1] = (unsigned char)'\0';
+      }
+      b->slen = i + 1;
+      for (j = 0; wspace(b->data[j]); j++)
+        ;
+      return tbdelete(b, 0, j);
+    }
+  }
+  b->data[0] = (unsigned char)'\0';
+  b->slen = 0;
+  return BSTR_OK;
+}
+
 static int bscb_noalloc(void *parm, int ofs, int len) {
   struct genBstrList *g = (struct genBstrList *)parm;
   struct tagbstring new_elem = {0};
@@ -13,6 +69,15 @@ static int bscb_noalloc(void *parm, int ofs, int len) {
     return BSTR_ERR;
   }
   return BSTR_OK;
+}
+
+bstrListEmb *bcstrsplit_noalloc(const char *str, unsigned char splicChar) {
+  if (str == NULL) {
+    return NULL;
+  }
+  struct tagbstring tb = {0};
+  cstr2tbstr(tb, str);
+  return bsplit_noalloc(&tb, splicChar);
 }
 
 bstrListEmb *bsplit_noalloc(const bstring str, unsigned char splicChar) {

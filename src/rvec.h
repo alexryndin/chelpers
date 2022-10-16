@@ -5,11 +5,12 @@
 #include <stdlib.h>
 
 typedef enum {
-  R_ERR_MEM = -1,
-  R_ERR_NP = -2,
-  R_ERR_OUT_OF_BOUNDS = -3,
-  R_ERR_VALUE = -4,
-} R_EC;
+  RV_ERR_OK = 0,
+  RV_ERR_MEM = -1,
+  RV_ERR_NP = -2,
+  RV_ERR_OUT_OF_BOUNDS = -3,
+  RV_ERR_VALUE = -4,
+} RV_EC;
 
 #define rvec_t(t) \
   struct {        \
@@ -40,7 +41,7 @@ typedef enum {
     if (s < 1) {                                                  \
       LOG_ERR("Wrong realloc value");                             \
       if (e != NULL) {                                            \
-        *e = R_ERR_VALUE;                                         \
+        *e = RV_ERR_VALUE;                                        \
       }                                                           \
       break;                                                      \
     }                                                             \
@@ -49,7 +50,7 @@ typedef enum {
     if (swap == NULL) {                                           \
       LOG_ERR("Vector reallocation failed");                      \
       if (e != NULL) {                                            \
-        *e = R_ERR_MEM;                                           \
+        *e = RV_ERR_MEM;                                          \
       }                                                           \
       break;                                                      \
     }                                                             \
@@ -72,7 +73,7 @@ typedef enum {
       if (swap == NULL) {                                           \
         LOG_ERR("Vector reallocation failed");                      \
         if (err != NULL) {                                          \
-          *(int *)err = R_ERR_MEM;                                  \
+          *(int *)err = RV_ERR_MEM;                                 \
           break;                                                    \
         }                                                           \
       }                                                             \
@@ -82,23 +83,24 @@ typedef enum {
     (vec).a[(vec).n++] = (value);                                   \
   } while (0)
 
-#define rv_pop(v, e)                                                         \
-  (((v).n <= (v).m) && ((v).n > 0)                                           \
-       ? (v).a[--(v).n]                                                      \
-       : (e != NULL ? (*(int *)e = R_ERR_OUT_OF_BOUNDS, (typeof(*(v).a)){0}) \
+#define rv_pop(v, e)                                                          \
+  (((v).n <= (v).m) && ((v).n > 0)                                            \
+       ? (v).a[--(v).n]                                                       \
+       : (e != NULL ? (*(int *)e = RV_ERR_OUT_OF_BOUNDS, (typeof(*(v).a)){0}) \
                     : (typeof(*(v).a)){0}))
 
-#define rv_get(v, i, e)                                                       \
-  (((i) < (v).n) && ((i) >= 0)                                                \
-       ? &((v).a[i])                                                          \
-       : (e != (NULL)                                                         \
-              ? (*(int *)e = R_ERR_OUT_OF_BOUNDS, ((typeof(*(v).a) *)(NULL))) \
+#define rv_get(v, i, e)                                                        \
+  (((i) < (v).n) && ((i) >= 0)                                                 \
+       ? &((v).a[i])                                                           \
+       : (e != (NULL)                                                          \
+              ? (*(int *)e = RV_ERR_OUT_OF_BOUNDS, ((typeof(*(v).a) *)(NULL))) \
               : ((typeof(*(v).a) *)(NULL))))
 
-#define rv_set(vec, i, value, e)                                               \
-  (((i) < (vec).m) && ((i) >= 0)                                               \
-       ? ((vec).n = ((vec).n > i ? (vec).n : i + 1), (vec).a[i] = value)       \
-       : (e != NULL ? (*(int *)e = R_ERR_OUT_OF_BOUNDS, (typeof(*(vec).a)){0}) \
-                    : (typeof(*(vec).a)){0}))
+#define rv_set(vec, i, value, e)                                          \
+  (((i) < (vec).m) && ((i) >= 0)                                          \
+       ? ((vec).n = ((vec).n > i ? (vec).n : i + 1), (vec).a[i] = value)  \
+       : (e != NULL                                                       \
+              ? (*(int *)e = RV_ERR_OUT_OF_BOUNDS, (typeof(*(vec).a)){0}) \
+              : (typeof(*(vec).a)){0}))
 
 #endif
