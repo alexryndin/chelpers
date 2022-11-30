@@ -3,12 +3,25 @@
 #include <bstrlib.h>
 #include <rvec.h>
 
+#define BSS(s) ((struct tagbstring)bsStatic(s))
+
 typedef rvec_t(struct tagbstring) bstrListEmb;
 
 struct genBstrList *genBstrList_create();
 
 int tbdelete(bstring b, int pos, int len);
 int tbtrimws(bstring b);
+
+#define bstrendswith(haystack, needle)                                         \
+  (((blength(haystack) - blength(needle)) < 0)                                 \
+       ? 0                                                                     \
+       : (binstr((haystack), blength(haystack) - blength(needle), (needle)) == \
+                  BSTR_ERR                                                     \
+              ? 0                                                              \
+              : 1))
+
+#define bstrstartswith(haystack, needle) \
+  (binstr((haystack), 0, (needle)) == BSTR_ERR ? 0 : 1)
 
 struct genBstrList {
   bstring b;
